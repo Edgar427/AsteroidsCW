@@ -59,7 +59,7 @@ void Asteroids::Start()
 	Animation *spaceship_anim = AnimationManager::GetInstance().CreateAnimationFromFile("spaceship", 128, 128, 128, 128, "spaceship_fs.png");
 
 	// Create a spaceship and add it to the world
-	mGameWorld->AddObject(CreateSpaceship());
+	//mGameWorld->AddObject(CreateSpaceship());
 	// Create some asteroids and add them to the world
 	CreateAsteroids(10);
 
@@ -87,13 +87,39 @@ void Asteroids::Stop()
 
 void Asteroids::OnKeyPressed(uchar key, int x, int y)
 {
-	switch (key)
+	if (!mGameStarted && (key == 's' || key == 'S'))
 	{
-	case ' ':
-		mSpaceship->Shoot();
-		break;
-	default:
-		break;
+		mGameStarted = true;
+
+		//hide the menu labels
+		if (mStartLabel) mStartLabel->SetVisible(false);
+		if (mInstructionsLabel1) mInstructionsLabel1->SetVisible(false);
+		if (mInstructionsLabel2) mInstructionsLabel2->SetVisible(false);
+
+		//unhide the game labels
+		if (mScoreLabel) mScoreLabel->SetVisible(true);
+		if (mLivesLabel) mLivesLabel->SetVisible(true);
+		
+		//error
+		mPlayer.SetLives(3); 
+
+		if (mLivesLabel) mLivesLabel->SetText("Lives: 3");
+		//
+
+		
+		mGameWorld->AddObject(CreateSpaceship());
+	}
+
+	if (mGameStarted)
+	{
+		switch (key)
+		{
+		case ' ':
+			mSpaceship->Shoot();
+			break;
+		default:
+			break;
+		}
 	}
 }
 
@@ -218,6 +244,7 @@ void Asteroids::CreateGUI()
 	mScoreLabel = make_shared<GUILabel>("Score: 0");
 	// Set the vertical alignment of the label to GUI_VALIGN_TOP
 	mScoreLabel->SetVerticalAlignment(GUIComponent::GUI_VALIGN_TOP);
+	mScoreLabel->SetVisible(false);
 	// Add the GUILabel to the GUIComponent  
 	shared_ptr<GUIComponent> score_component
 		= static_pointer_cast<GUIComponent>(mScoreLabel);
@@ -227,6 +254,7 @@ void Asteroids::CreateGUI()
 	mLivesLabel = make_shared<GUILabel>("Lives: 3");
 	// Set the vertical alignment of the label to GUI_VALIGN_BOTTOM
 	mLivesLabel->SetVerticalAlignment(GUIComponent::GUI_VALIGN_BOTTOM);
+	mLivesLabel->SetVisible(false);
 	// Add the GUILabel to the GUIComponent  
 	shared_ptr<GUIComponent> lives_component = static_pointer_cast<GUIComponent>(mLivesLabel);
 	mGameDisplay->GetContainer()->AddComponent(lives_component, GLVector2f(0.0f, 0.0f));
@@ -243,6 +271,36 @@ void Asteroids::CreateGUI()
 	shared_ptr<GUIComponent> game_over_component
 		= static_pointer_cast<GUIComponent>(mGameOverLabel);
 	mGameDisplay->GetContainer()->AddComponent(game_over_component, GLVector2f(0.5f, 0.5f));
+
+	// GUI for start
+	mStartLabel = make_shared<GUILabel>("Press 'S' to Start the Game");
+	mStartLabel->SetHorizontalAlignment(GUIComponent::GUI_HALIGN_CENTER);
+	mStartLabel->SetVerticalAlignment(GUIComponent::GUI_VALIGN_MIDDLE);
+	mStartLabel->SetVisible(true); 
+	shared_ptr<GUIComponent> start_component = static_pointer_cast<GUIComponent>(mStartLabel);
+	mGameDisplay->GetContainer()->AddComponent(start_component, GLVector2f(0.5f, 0.5f)); 
+
+	// GUI for instructions
+	//1
+	mInstructionsLabel1 = make_shared<GUILabel>("Arrow keys to move");
+	mInstructionsLabel1->SetHorizontalAlignment(GUIComponent::GUI_HALIGN_RIGHT);
+	mInstructionsLabel1->SetVerticalAlignment(GUIComponent::GUI_VALIGN_TOP);
+	mInstructionsLabel1->SetVisible(true);
+	shared_ptr<GUIComponent> instructions_component1 = static_pointer_cast<GUIComponent>(mInstructionsLabel1);
+	mGameDisplay->GetContainer()->AddComponent(instructions_component1, GLVector2f(1.0f, 1.0f)); 
+	//2
+	mInstructionsLabel2 = make_shared<GUILabel>("Spacebar to shoot");
+	mInstructionsLabel2->SetHorizontalAlignment(GUIComponent::GUI_HALIGN_RIGHT);
+	mInstructionsLabel2->SetVerticalAlignment(GUIComponent::GUI_VALIGN_TOP);
+	mInstructionsLabel2->SetVisible(true);
+	shared_ptr<GUIComponent> instructions_component2 = static_pointer_cast<GUIComponent>(mInstructionsLabel2);
+	mGameDisplay->GetContainer()->AddComponent(instructions_component2, GLVector2f(1.0f, 0.96f)); 
+
+
+
+
+
+
 
 }
 

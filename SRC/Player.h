@@ -39,6 +39,9 @@ public:
 			(*lit)->OnPlayerKilled(mLives);
 		}
 	}
+	//error
+	void SetLives(int lives) { mLives = lives; }
+	//
 
 private:
 	int mLives;
