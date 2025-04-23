@@ -11,6 +11,10 @@
 #include "BoundingSphere.h"
 #include "GUILabel.h"
 #include "Explosion.h"
+#include <algorithm>
+#include <fstream>
+
+
 //kllklklkklkllklklkkl/ddfdffdf/dfsdfsdfsfd
 // PUBLIC INSTANCE CONSTRUCTORS ///////////////////////////////////////////////
 
@@ -66,6 +70,9 @@ void Asteroids::Start()
 	//Create the GUI
 	CreateGUI();
 
+	LoadHighScores();        //  Load high scores from file
+	ShowHighScoreTable();
+
 	// Add a player (watcher) to the game world
 	mGameWorld->AddListener(&mPlayer);
 
@@ -96,6 +103,13 @@ void Asteroids::OnKeyPressed(uchar key, int x, int y)
 		if (mInstructionsLabel1) mInstructionsLabel1->SetVisible(false);
 		if (mInstructionsLabel2) mInstructionsLabel2->SetVisible(false);
 
+		//  hide score table labels
+		for (auto& label : mHighScoreLabels)
+		{
+			label->SetVisible(false);
+		}
+
+
 		//unhide the game labels
 		if (mScoreLabel) mScoreLabel->SetVisible(true);
 		if (mLivesLabel) mLivesLabel->SetVisible(true);
@@ -121,7 +135,120 @@ void Asteroids::OnKeyPressed(uchar key, int x, int y)
 			break;
 		}
 	}
+
+	if (mIsGameOver)
+	{
+		// Character input (max 10 chars)
+		if (key >= 32 && key <= 126 && mPlayerName.length() < 10)
+		{
+			mPlayerName += key;
+		}
+
+		// Backspace support
+		if (key == 8 && !mPlayerName.empty())
+		{
+			mPlayerName.pop_back();
+		}
+
+		// Update label as user types
+		if (mNameEntryLabel)
+		{
+			std::ostringstream msg;
+			msg << "Enter Name: " << mPlayerName;
+			mNameEntryLabel->SetText(msg.str());
+		}
+
+		// Press Enter to save name and score
+		if (key == 13 || key == '\r')
+		{
+			// Get final score from ScoreKeeper
+			int score = mScoreKeeper.GetScore();
+
+			// Add to high score list
+			mHighScores.push_back({ mPlayerName, score });
+			SaveHighScores();
+
+			// Sort high scores by score descending
+			std::sort(mHighScores.begin(), mHighScores.end(),
+				[](const std::pair<std::string, int>& a, const std::pair<std::string, int>& b) {
+					return a.second > b.second;
+				});
+
+			// Clean up name entry UI
+			mIsGameOver = false;
+			mGameOverLabel->SetVisible(false);
+			mNameEntryLabel->SetVisible(false);
+
+			// Show top scores on screen
+			ShowHighScoreTable();
+		}
+		return; // block other inputs during game over
+	}
 }
+void Asteroids::ShowHighScoreTable()
+{
+	float yPos = 0.80f; // start from near the top middle
+	int displayCount = std::min((int)mHighScores.size(), 5); // show top 5
+
+	mHighScoreLabels.clear();
+
+	for (int i = 0; i < displayCount; ++i)
+	{
+		std::ostringstream label;
+		label << i + 1 << ". " << mHighScores[i].first << " - " << mHighScores[i].second;
+
+		auto scoreLabel = make_shared<GUILabel>(label.str());
+		scoreLabel->SetHorizontalAlignment(GUIComponent::GUI_HALIGN_CENTER);
+		scoreLabel->SetVerticalAlignment(GUIComponent::GUI_VALIGN_MIDDLE);
+
+		mGameDisplay->GetContainer()->AddComponent(
+			static_pointer_cast<GUIComponent>(scoreLabel),
+			GLVector2f(0.5f, yPos)); // center the label
+
+		mHighScoreLabels.push_back(scoreLabel);
+
+		yPos -= 0.05f; // stack downward
+	}
+}
+
+void Asteroids::SaveHighScores()
+{
+	std::ofstream file("highscores.txt");
+	if (!file.is_open()) return;
+
+	for (const auto& entry : mHighScores)
+	{
+		file << entry.first << " " << entry.second << "\n";
+	}
+
+	file.close();
+}
+
+void Asteroids::LoadHighScores()
+{
+	std::ifstream file("highscores.txt");
+	if (!file.is_open()) return;
+
+	mHighScores.clear();
+	std::string name;
+	int score;
+
+	while (file >> name >> score)
+	{
+		mHighScores.push_back({ name, score });
+	}
+
+	file.close();
+
+	// Sort scores descending
+	std::sort(mHighScores.begin(), mHighScores.end(),
+		[](const auto& a, const auto& b) {
+			return a.second > b.second;
+		});
+}
+
+
+
 
 void Asteroids::OnKeyReleased(uchar key, int x, int y) {}
 
@@ -193,8 +320,18 @@ void Asteroids::OnTimer(int value)
 
 	if (value == SHOW_GAME_OVER)
 	{
+		mIsGameOver = true;
 		mGameOverLabel->SetVisible(true);
+
+		mPlayerName = ""; // Reset name entry
+
+		if (mNameEntryLabel)
+		{
+			mNameEntryLabel->SetText("Enter Name: ");
+			mNameEntryLabel->SetVisible(true);
+		}
 	}
+
 
 }
 
@@ -296,9 +433,15 @@ void Asteroids::CreateGUI()
 	shared_ptr<GUIComponent> instructions_component2 = static_pointer_cast<GUIComponent>(mInstructionsLabel2);
 	mGameDisplay->GetContainer()->AddComponent(instructions_component2, GLVector2f(1.0f, 0.96f)); 
 
+	// Name entry label for high score input
+	mNameEntryLabel = make_shared<GUILabel>("Enter Name: ");
+	mNameEntryLabel->SetHorizontalAlignment(GUIComponent::GUI_HALIGN_CENTER);
+	mNameEntryLabel->SetVerticalAlignment(GUIComponent::GUI_VALIGN_BOTTOM);
+	mNameEntryLabel->SetVisible(false);
 
-
-
+	mGameDisplay->GetContainer()->AddComponent(
+		static_pointer_cast<GUIComponent>(mNameEntryLabel),
+		GLVector2f(0.5f, 0.1f)); // Bottom-center
 
 
 
@@ -312,6 +455,8 @@ void Asteroids::OnScoreChanged(int score)
 	// Get the score message as a string
 	std::string score_msg = msg_stream.str();
 	mScoreLabel->SetText(score_msg);
+
+
 }
 
 void Asteroids::OnPlayerKilled(int lives_left)

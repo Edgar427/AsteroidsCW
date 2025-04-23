@@ -13,6 +13,8 @@ class ScoreKeeper : public IGameWorldListener
 public:
 	ScoreKeeper() { mScore = 0; }
 	virtual ~ScoreKeeper() {}
+	int GetScore() const { return mScore; }
+
 
 	void OnWorldUpdated(GameWorld* world) {}
 	void OnObjectAdded(GameWorld* world, shared_ptr<GameObject> object) {}

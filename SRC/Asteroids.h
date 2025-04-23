@@ -9,6 +9,10 @@
 #include "ScoreKeeper.h"
 #include "Player.h"
 #include "IPlayerListener.h"
+#include <string>
+#include <vector>
+#include <utility>
+
 
 class GameObject;
 class Spaceship;
@@ -58,6 +62,19 @@ private:
 
 	bool mGameStarted = false;
 
+	// High score logic
+	bool mIsGameOver = false;
+	std::string mPlayerName;
+	std::vector<std::pair<std::string, int>> mHighScores;
+
+	// Label to show name entry
+	shared_ptr<GUILabel> mNameEntryLabel;
+	std::vector<std::shared_ptr<GUILabel>> mHighScoreLabels; //  store score labels
+
+	
+	void LoadHighScores();
+	void SaveHighScores();
+	void ShowHighScoreTable();
 
 
 	uint mLevel;
