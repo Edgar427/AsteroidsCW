@@ -138,6 +138,13 @@ void Asteroids::OnKeyPressed(uchar key, int x, int y)
 
 	if (mIsGameOver)
 	{
+	{	
+		if (key == 9)
+		{
+			ResetToMainMenu();
+			return;
+		}
+
 		// Character input (max 10 chars)
 		if (key >= 32 && key <= 126 && mPlayerName.length() < 10)
 		{
@@ -178,6 +185,7 @@ void Asteroids::OnKeyPressed(uchar key, int x, int y)
 			mIsGameOver = false;
 			mGameOverLabel->SetVisible(false);
 			mNameEntryLabel->SetVisible(false);
+
 
 			// Show top scores on screen
 			ShowHighScoreTable();
@@ -246,6 +254,29 @@ void Asteroids::LoadHighScores()
 			return a.second > b.second;
 		});
 }
+
+void Asteroids::ResetToMainMenu()
+{
+	mIsGameOver = false;
+	mGameStarted = false;
+	mPlayerName.clear();
+
+	// Hide game gui
+	if (mScoreLabel) mScoreLabel->SetVisible(false);
+	if (mLivesLabel) mLivesLabel->SetVisible(false);
+	if (mGameOverLabel) mGameOverLabel->SetVisible(false);
+	if (mNameEntryLabel) mNameEntryLabel->SetVisible(false);
+	if (mReturnToMenuLabel) mReturnToMenuLabel->SetVisible(false);
+
+	// Show menu again
+	if (mStartLabel) mStartLabel->SetVisible(true);
+	if (mInstructionsLabel1) mInstructionsLabel1->SetVisible(true);
+	if (mInstructionsLabel2) mInstructionsLabel2->SetVisible(true);
+
+	// Show high score table again
+	ShowHighScoreTable();
+}
+
 
 
 
@@ -324,6 +355,10 @@ void Asteroids::OnTimer(int value)
 		mGameOverLabel->SetVisible(true);
 
 		mPlayerName = ""; // Reset name entry
+
+		if (mReturnToMenuLabel)
+			mReturnToMenuLabel->SetVisible(true);
+
 
 		if (mNameEntryLabel)
 		{
@@ -434,14 +469,24 @@ void Asteroids::CreateGUI()
 	mGameDisplay->GetContainer()->AddComponent(instructions_component2, GLVector2f(1.0f, 0.96f)); 
 
 	// Name entry label for high score input
+	// GUI for returning to main menu
+	mReturnToMenuLabel = make_shared<GUILabel>("Press TAB to return to menu");
+	mReturnToMenuLabel->SetHorizontalAlignment(GUIComponent::GUI_HALIGN_CENTER);
+	mReturnToMenuLabel->SetVerticalAlignment(GUIComponent::GUI_VALIGN_BOTTOM);
+	mReturnToMenuLabel->SetVisible(false);
+	shared_ptr<GUIComponent> return_menu_component = static_pointer_cast<GUIComponent>(mReturnToMenuLabel);
+	mGameDisplay->GetContainer()->AddComponent(return_menu_component, GLVector2f(0.5f, 0.05f));
+
+
+
+	// Name entry label for high score table input
 	mNameEntryLabel = make_shared<GUILabel>("Enter Name: ");
 	mNameEntryLabel->SetHorizontalAlignment(GUIComponent::GUI_HALIGN_CENTER);
 	mNameEntryLabel->SetVerticalAlignment(GUIComponent::GUI_VALIGN_BOTTOM);
 	mNameEntryLabel->SetVisible(false);
+	shared_ptr<GUIComponent> name_entry_component = static_pointer_cast<GUIComponent>(mNameEntryLabel);
+	mGameDisplay->GetContainer()->AddComponent(name_entry_component, GLVector2f(0.5f, 0.1f));
 
-	mGameDisplay->GetContainer()->AddComponent(
-		static_pointer_cast<GUIComponent>(mNameEntryLabel),
-		GLVector2f(0.5f, 0.1f)); // Bottom-center
 
 
 

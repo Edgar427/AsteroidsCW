@@ -59,8 +59,12 @@ private:
 	shared_ptr<GUILabel> mStartLabel;
 	shared_ptr<GUILabel> mInstructionsLabel1;
 	shared_ptr<GUILabel> mInstructionsLabel2;
+	shared_ptr<GUILabel> mReturnToMenuLabel;
+
 
 	bool mGameStarted = false;
+	
+
 
 	// High score logic
 	bool mIsGameOver = false;
@@ -75,6 +79,8 @@ private:
 	void LoadHighScores();
 	void SaveHighScores();
 	void ShowHighScoreTable();
+	void ResetToMainMenu(); 
+
 
 
 	uint mLevel;
