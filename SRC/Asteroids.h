@@ -59,11 +59,14 @@ private:
 	shared_ptr<GUILabel> mStartLabel;
 	shared_ptr<GUILabel> mInstructionsLabel1;
 	shared_ptr<GUILabel> mInstructionsLabel2;
+	shared_ptr<GUILabel> mInstructionsLabel3;
 	shared_ptr<GUILabel> mReturnToMenuLabel;
 
 
 	bool mGameStarted = false;
 	
+	bool mIsHighScoreDisplayed = false;
+
 
 
 	// High score logic

@@ -70,8 +70,8 @@ void Asteroids::Start()
 	//Create the GUI
 	CreateGUI();
 
-	LoadHighScores();        //  Load high scores from file
-	ShowHighScoreTable();
+	LoadHighScores(); //  Load high scores from file
+
 
 	// Add a player (watcher) to the game world
 	mGameWorld->AddListener(&mPlayer);
@@ -93,7 +93,14 @@ void Asteroids::Stop()
 // PUBLIC INSTANCE METHODS IMPLEMENTING IKeyboardListener /////////////////////
 
 void Asteroids::OnKeyPressed(uchar key, int x, int y)
-{
+{	
+
+	if ((mIsGameOver || mIsHighScoreDisplayed) && key == 9)
+	{
+		ResetToMainMenu();
+		return;
+	}
+
 	if (!mGameStarted && (key == 's' || key == 'S'))
 	{
 		mGameStarted = true;
@@ -102,14 +109,9 @@ void Asteroids::OnKeyPressed(uchar key, int x, int y)
 		if (mStartLabel) mStartLabel->SetVisible(false);
 		if (mInstructionsLabel1) mInstructionsLabel1->SetVisible(false);
 		if (mInstructionsLabel2) mInstructionsLabel2->SetVisible(false);
+		if (mInstructionsLabel3) mInstructionsLabel3->SetVisible(false);
 
-		//  hide score table labels
-		for (auto& label : mHighScoreLabels)
-		{
-			label->SetVisible(false);
-		}
-
-
+		
 		//unhide the game labels
 		if (mScoreLabel) mScoreLabel->SetVisible(true);
 		if (mLivesLabel) mLivesLabel->SetVisible(true);
@@ -136,14 +138,9 @@ void Asteroids::OnKeyPressed(uchar key, int x, int y)
 		}
 	}
 
+
 	if (mIsGameOver)
-	{
 	{	
-		if (key == 9)
-		{
-			ResetToMainMenu();
-			return;
-		}
 
 		// Character input (max 10 chars)
 		if (key >= 32 && key <= 126 && mPlayerName.length() < 10)
@@ -189,6 +186,7 @@ void Asteroids::OnKeyPressed(uchar key, int x, int y)
 
 			// Show top scores on screen
 			ShowHighScoreTable();
+			mIsHighScoreDisplayed = true;
 		}
 		return; // block other inputs during game over
 	}
@@ -268,13 +266,27 @@ void Asteroids::ResetToMainMenu()
 	if (mNameEntryLabel) mNameEntryLabel->SetVisible(false);
 	if (mReturnToMenuLabel) mReturnToMenuLabel->SetVisible(false);
 
+	for (auto& label : mHighScoreLabels)
+	{
+		label->SetVisible(false);                     
+		mGameDisplay->GetContainer()->RemoveComponent(label);  
+	}
+	mHighScoreLabels.clear();  
+
+	mPlayerName.clear();
+
+	//  new way of resetting player name
+	if (mNameEntryLabel)
+	{
+		mNameEntryLabel->SetText("Enter Name: ");
+		mNameEntryLabel->SetVisible(false);
+	}
+	
 	// Show menu again
 	if (mStartLabel) mStartLabel->SetVisible(true);
 	if (mInstructionsLabel1) mInstructionsLabel1->SetVisible(true);
 	if (mInstructionsLabel2) mInstructionsLabel2->SetVisible(true);
-
-	// Show high score table again
-	ShowHighScoreTable();
+	if (mInstructionsLabel3) mInstructionsLabel3->SetVisible(true);
 }
 
 
@@ -354,7 +366,7 @@ void Asteroids::OnTimer(int value)
 		mIsGameOver = true;
 		mGameOverLabel->SetVisible(true);
 
-		mPlayerName = ""; // Reset name entry
+		
 
 		if (mReturnToMenuLabel)
 			mReturnToMenuLabel->SetVisible(true);
@@ -362,7 +374,6 @@ void Asteroids::OnTimer(int value)
 
 		if (mNameEntryLabel)
 		{
-			mNameEntryLabel->SetText("Enter Name: ");
 			mNameEntryLabel->SetVisible(true);
 		}
 	}
@@ -459,14 +470,22 @@ void Asteroids::CreateGUI()
 	mInstructionsLabel1->SetVerticalAlignment(GUIComponent::GUI_VALIGN_TOP);
 	mInstructionsLabel1->SetVisible(true);
 	shared_ptr<GUIComponent> instructions_component1 = static_pointer_cast<GUIComponent>(mInstructionsLabel1);
-	mGameDisplay->GetContainer()->AddComponent(instructions_component1, GLVector2f(1.0f, 1.0f)); 
+	mGameDisplay->GetContainer()->AddComponent(instructions_component1, GLVector2f(1.0f, 0.92f)); 
 	//2
 	mInstructionsLabel2 = make_shared<GUILabel>("Spacebar to shoot");
 	mInstructionsLabel2->SetHorizontalAlignment(GUIComponent::GUI_HALIGN_RIGHT);
 	mInstructionsLabel2->SetVerticalAlignment(GUIComponent::GUI_VALIGN_TOP);
 	mInstructionsLabel2->SetVisible(true);
 	shared_ptr<GUIComponent> instructions_component2 = static_pointer_cast<GUIComponent>(mInstructionsLabel2);
-	mGameDisplay->GetContainer()->AddComponent(instructions_component2, GLVector2f(1.0f, 0.96f)); 
+	mGameDisplay->GetContainer()->AddComponent(instructions_component2, GLVector2f(1.0f, 0.96f));
+
+	//3
+	mInstructionsLabel3 = make_shared<GUILabel>("Instructions:");
+	mInstructionsLabel3->SetHorizontalAlignment(GUIComponent::GUI_HALIGN_RIGHT);
+	mInstructionsLabel3->SetVerticalAlignment(GUIComponent::GUI_VALIGN_TOP);
+	mInstructionsLabel3->SetVisible(true);
+	shared_ptr<GUIComponent> instructions_component3 = static_pointer_cast<GUIComponent>(mInstructionsLabel3);
+	mGameDisplay->GetContainer()->AddComponent(instructions_component3, GLVector2f(1.0f, 1.0f));
 
 	// Name entry label for high score input
 	// GUI for returning to main menu
@@ -485,7 +504,7 @@ void Asteroids::CreateGUI()
 	mNameEntryLabel->SetVerticalAlignment(GUIComponent::GUI_VALIGN_BOTTOM);
 	mNameEntryLabel->SetVisible(false);
 	shared_ptr<GUIComponent> name_entry_component = static_pointer_cast<GUIComponent>(mNameEntryLabel);
-	mGameDisplay->GetContainer()->AddComponent(name_entry_component, GLVector2f(0.5f, 0.1f));
+	mGameDisplay->GetContainer()->AddComponent(name_entry_component, GLVector2f(0.5f, 0.1f)); // Bottom-center
 
 
 
