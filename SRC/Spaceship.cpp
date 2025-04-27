@@ -38,6 +38,18 @@ void Spaceship::Update(int t)
 {
 	// Call parent update function
 	GameObject::Update(t);
+
+	if (mIsInvulnerable)
+	{
+		mInvulnerabilityTimer -= t;
+		if (mInvulnerabilityTimer <= 0)
+		{
+			mIsInvulnerable = false;
+			mInvulnerabilityTimer = 0;
+		}
+	}
+
+
 }
 
 /** Render this spaceship. */
@@ -93,14 +105,37 @@ void Spaceship::Shoot(void)
 }
 
 bool Spaceship::CollisionTest(shared_ptr<GameObject> o)
-{
-	if (o->GetType() != GameObjectType("Asteroid")) return false;
-	if (mBoundingShape.get() == NULL) return false;
-	if (o->GetBoundingShape().get() == NULL) return false;
+{	
+	if (!o) return false;  //error fixed
+
+	
+	if (o->GetType() == GameObjectType("Asteroid"))
+	{
+		if (mIsInvulnerable)
+			return false; 
+	}
+	else
+	{
+		
+		return false;
+	}
+
+	if (!mBoundingShape || !o->GetBoundingShape())
+		return false;
+
 	return mBoundingShape->CollisionTest(o->GetBoundingShape());
 }
 
 void Spaceship::OnCollision(const GameObjectList &objects)
 {
-	mWorld->FlagForRemoval(GetThisPtr());
+	if (mIsInvulnerable) return;  
+
+	for (auto& obj : objects)
+	{
+		if (obj->GetType() == GameObjectType("Asteroid"))
+		{
+			mWorld->FlagForRemoval(GetThisPtr());
+			return;
+		}
+	}
 }

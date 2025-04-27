@@ -208,3 +208,9 @@ void GameWorld::WrapXY(GLfloat &x, GLfloat &y)
 	while (x < -mWidth/2)  x += mWidth; 
 	while (y < -mHeight/2) y += mHeight; 
 }
+
+//helper class for removing all powerups
+GameObjectList GameWorld::GetAllObjects()
+{
+	return mGameObjects;
+}

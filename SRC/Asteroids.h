@@ -44,7 +44,7 @@ public:
 
 	// Declaration of IGameWorldListener interface //////////////////////////////
 
-	void OnWorldUpdated(GameWorld* world) {}
+	void OnWorldUpdated(GameWorld* world);
 	void OnObjectAdded(GameWorld* world, shared_ptr<GameObject> object) {}
 	void OnObjectRemoved(GameWorld* world, shared_ptr<GameObject> object);
 
@@ -61,11 +61,21 @@ private:
 	shared_ptr<GUILabel> mInstructionsLabel2;
 	shared_ptr<GUILabel> mInstructionsLabel3;
 	shared_ptr<GUILabel> mReturnToMenuLabel;
-
+	shared_ptr<GUILabel> mInvulnerableLabel; 
+	shared_ptr<GUILabel> mExtraLifeLabel;
+	shared_ptr<GUILabel> mInvulnerabilityPowerUpLabel;
+	shared_ptr<GUILabel> mInstructionsLabel4;
+	shared_ptr<GUILabel> mInstructionsLabel5;
 
 	bool mGameStarted = false;
 	
 	bool mIsHighScoreDisplayed = false;
+
+
+	// power up toggles
+	bool mEnableExtraLifePowerUp = true;
+	bool mEnableInvulnerabilityPowerUp = true;
+
 
 
 
@@ -83,6 +93,16 @@ private:
 	void SaveHighScores();
 	void ShowHighScoreTable();
 	void ResetToMainMenu(); 
+	void CreatePowerUps();  
+	void CreateInvulnerabilityPowerUp();
+	void RemoveAllPowerUps();
+	
+
+
+	const static uint SPAWN_EXTRA_LIFE_POWERUP = 4;
+	const static uint SPAWN_INVULNERABILITY_POWERUP = 5;  
+
+
 
 
 

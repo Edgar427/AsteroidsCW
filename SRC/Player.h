@@ -42,6 +42,8 @@ public:
 	//error
 	void SetLives(int lives) { mLives = lives; }
 	//
+	int GetLives() const { return mLives; }
+
 
 private:
 	int mLives;

@@ -48,6 +48,9 @@ public:
 
 	void WrapXY(float &x, float &y);
 
+	GameObjectList GetAllObjects(); // for powerup removing
+
+
 protected:
 	void UpdateObjects(int t);
 	void UpdateCollisions(int t);
