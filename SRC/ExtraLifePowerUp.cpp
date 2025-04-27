@@ -2,6 +2,7 @@
 #include "Spaceship.h"
 #include "BoundingShape.h"
 
+
 ExtraLifePowerUp::ExtraLifePowerUp()
     : GameObject("ExtraLifePowerUp")
 {
@@ -23,12 +24,7 @@ void ExtraLifePowerUp::OnCollision(const GameObjectList& objects)
     {
         if (obj->GetType() == GameObjectType("Spaceship"))
         {
-            auto spaceship = dynamic_pointer_cast<Spaceship>(obj);
-            if (spaceship)
-            {
-                mWorld->FlagForRemoval(GetThisPtr());  
-              
-            }
+            mWorld->FlagForRemoval(GetThisPtr());
         }
     }
 }

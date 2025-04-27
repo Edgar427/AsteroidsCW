@@ -93,7 +93,7 @@ private:
 	void SaveHighScores();
 	void ShowHighScoreTable();
 	void ResetToMainMenu(); 
-	void CreatePowerUps();  
+	void CreateExtraLifePowerUp();
 	void CreateInvulnerabilityPowerUp();
 	void RemoveAllPowerUps();
 	

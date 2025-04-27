@@ -32,6 +32,13 @@ public:
 		mListeners.push_back(listener);
 	}
 
+	void Reset()
+	{
+		mScore = 0;
+		FireScoreChanged(); 
+	}
+
+
 	void FireScoreChanged()
 	{
 		// Send message to all listeners
